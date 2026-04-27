@@ -1,0 +1,20 @@
+{
+  "name": "원료 DB",
+  "short_name": "원료DB",
+  "start_url": "./원료DB.html",
+  "display": "standalone",
+  "background_color": "#f0f0eb",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4e6.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4e6.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
