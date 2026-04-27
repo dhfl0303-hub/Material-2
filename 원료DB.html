@@ -1,9 +1,44 @@
 <!DOCTYPE html>
-<!-- saved from url=(0059)file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_2.html -->
-<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>원료 DB</title>
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="원료DB">
+<meta name="theme-color" content="#1a1a1a">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA17v9qmiIJVLOsp7iNwMmtw8iQwnaaaJA",
+    authDomain: "m-db-6fe4e.firebaseapp.com",
+    projectId: "m-db-6fe4e",
+    storageBucket: "m-db-6fe4e.firebasestorage.app",
+    messagingSenderId: "233165673451",
+    appId: "1:233165673451:web:33986bb690dc7c2b46ffae"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const firestoreDB = getFirestore(app);
+  window._firestoreDB = firestoreDB;
+  window._addDoc = addDoc;
+  window._updateDoc = updateDoc;
+  window._deleteDoc = deleteDoc;
+  window._doc = doc;
+  window._collection = collection;
+
+  import { onSnapshot as _onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+  _onSnapshot(collection(firestoreDB, "ingredients"), (snapshot) => {
+    window.db = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
+    if (typeof renderItems === "function") renderItems();
+    const badge = document.getElementById("countBadge");
+    if (badge) badge.textContent = window.db.length;
+  });
+</script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, 'Malgun Gothic', sans-serif; background: #f0f0eb; color: #1a1a1a; font-size: 15px; }
@@ -273,7 +308,7 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
 
 <!-- 스캐너 -->
 <div id="scannerPanel">
-  <video id="video" autoplay="" playsinline="" muted=""></video>
+  <video id="video" autoplay playsinline muted></video>
   <div class="scan-status" id="scanStatus">카메라 시작 중...</div>
   <div class="manual-bc" id="manualBcRow">
     <input type="text" id="manualBcInput" placeholder="바코드 번호 직접 입력" inputmode="numeric">
@@ -338,19 +373,19 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
 
   <!-- 사진 -->
   <div class="photo-row">
-    <div class="photo-box" onclick="document.getElementById(&#39;photoFront&#39;).click()">
+    <div class="photo-box" onclick="document.getElementById('photoFront').click()">
       <span class="photo-icon">📷</span>
       <span class="photo-label">전면</span>
-      <img id="prevFront" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_2.html" style="display:none">
+      <img id="prevFront" src="" style="display:none">
     </div>
-    <div class="photo-box" onclick="document.getElementById(&#39;photoBack&#39;).click()">
+    <div class="photo-box" onclick="document.getElementById('photoBack').click()">
       <span class="photo-icon">📷</span>
       <span class="photo-label">후면</span>
-      <img id="prevBack" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_2.html" style="display:none">
+      <img id="prevBack" src="" style="display:none">
     </div>
   </div>
-  <input type="file" id="photoFront" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(&#39;front&#39;, event)">
-  <input type="file" id="photoBack" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(&#39;back&#39;, event)">
+  <input type="file" id="photoFront" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto('front', event)">
+  <input type="file" id="photoBack" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto('back', event)">
 
   <!-- AI 추출 버튼 -->
   <button class="btn btn-dark" style="width:100%;margin-bottom:12px" onclick="extractWithAI()">🤖 후면 사진으로 원재료 자동 추출</button>
@@ -392,7 +427,7 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
 
 <!-- 목록 -->
 <div class="items-wrap">
-  <div class="empty" id="emptyMsg" style="display: block;">
+  <div class="empty" id="emptyMsg">
     <div class="icon">🗃</div>
     <p>등록된 원료가 없어요<br>바코드를 스캔하거나 추가해주세요</p>
   </div>
@@ -402,12 +437,12 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
 <!-- 이미지 모달 -->
 <div id="imgModal" onclick="closeImgModal()">
   <span class="close">×</span>
-  <img id="modalImg" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_2.html">
+  <img id="modalImg" src="">
 </div>
 
 <script>
 // ── 상태 ──
-let db = JSON.parse(localStorage.getItem('ingredientDB') || '[]');
+let db = window.db || [];
 let formFront = null, formBack = null;
 let editId = null;
 let pendingBarcode = null;
@@ -416,7 +451,22 @@ let videoStream = null, scanTimer = null;
 const ALLERGIES = ['밀','우유','계란','대두','땅콩','견과류','게','새우','오징어','조개류','복숭아','토마토','아황산류','돼지고기','쇠고기','닭고기'];
 let selectedAllergies = [];
 
-function saveDB() { localStorage.setItem('ingredientDB', JSON.stringify(db)); }
+async function saveDB(item) {
+  try {
+    if (item._docId) {
+      const docId = item._docId;
+      const {_docId, ...data} = item;
+      await window._updateDoc(window._doc(window._firestoreDB, 'ingredients', docId), data);
+    } else {
+      await window._addDoc(window._collection(window._firestoreDB, 'ingredients'), item);
+    }
+  } catch(e) { console.error('Firestore save error:', e); }
+}
+async function deleteFromDB(docId) {
+  try {
+    await window._deleteDoc(window._doc(window._firestoreDB, 'ingredients', docId));
+  } catch(e) { console.error('Firestore delete error:', e); }
+}
 
 // ── 알레르기 렌더 ──
 function renderAllergyGrid() {
@@ -662,25 +712,16 @@ function submitForm() {
     updatedAt: new Date().toISOString()
   };
 
-  if (editId) {
-    db = db.map(d => d.id === editId ? item : d);
-    toast('✅ 수정됐어요');
-  } else {
-    db.push(item);
-    toast('✅ 등록됐어요');
-  }
-
-  saveDB();
+  saveDB(item);
   closeForm();
-  renderItems();
+  toast(editId ? '✅ 수정됐어요' : '✅ 등록됐어요');
 }
 
 // ── 삭제 ──
 function deleteItem(id) {
   if (!confirm('삭제할까요?')) return;
-  db = db.filter(d => d.id !== id);
-  saveDB();
-  renderItems();
+  const item = db.find(d => d.id === id);
+  if (item && item._docId) deleteFromDB(item._docId);
   toast('🗑 삭제됐어요');
 }
 
@@ -765,6 +806,5 @@ function toast(msg) {
 
 renderItems();
 </script>
-
-
-</body></html>
+</body>
+</html>
