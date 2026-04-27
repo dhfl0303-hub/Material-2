@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0059)file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_3.html -->
+<!-- saved from url=(0059)file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_4.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -9,10 +9,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="원료DB">
 <meta name="theme-color" content="#1a1a1a">
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-
+<script src="./원료DB_files/firebase-app-compat.js.다운로드"></script>
+<script src="./원료DB_files/firebase-firestore-compat.js.다운로드"></script>
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyA17v9qmiIJVLOsp7iNwMmtw8iQwnaaaJA",
     authDomain: "m-db-6fe4e.firebaseapp.com",
@@ -21,23 +20,9 @@
     messagingSenderId: "233165673451",
     appId: "1:233165673451:web:33986bb690dc7c2b46ffae"
   };
-
-  const app = initializeApp(firebaseConfig);
-  const firestoreDB = getFirestore(app);
+  firebase.initializeApp(firebaseConfig);
+  const firestoreDB = firebase.firestore();
   window._firestoreDB = firestoreDB;
-  window._addDoc = addDoc;
-  window._updateDoc = updateDoc;
-  window._deleteDoc = deleteDoc;
-  window._doc = doc;
-  window._collection = collection;
-
-  import { onSnapshot as _onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-  _onSnapshot(collection(firestoreDB, "ingredients"), (snapshot) => {
-    window.db = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
-    if (typeof renderItems === "function") renderItems();
-    const badge = document.getElementById("countBadge");
-    if (badge) badge.textContent = window.db.length;
-  });
 </script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -376,12 +361,12 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
     <div class="photo-box" onclick="document.getElementById(&#39;photoFront&#39;).click()">
       <span class="photo-icon">📷</span>
       <span class="photo-label">전면</span>
-      <img id="prevFront" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_3.html" style="display:none">
+      <img id="prevFront" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_4.html" style="display:none">
     </div>
     <div class="photo-box" onclick="document.getElementById(&#39;photoBack&#39;).click()">
       <span class="photo-icon">📷</span>
       <span class="photo-label">후면</span>
-      <img id="prevBack" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_3.html" style="display:none">
+      <img id="prevBack" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_4.html" style="display:none">
     </div>
   </div>
   <input type="file" id="photoFront" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(&#39;front&#39;, event)">
@@ -437,12 +422,12 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
 <!-- 이미지 모달 -->
 <div id="imgModal" onclick="closeImgModal()">
   <span class="close">×</span>
-  <img id="modalImg" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_3.html">
+  <img id="modalImg" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_4.html">
 </div>
 
 <script>
 // ── 상태 ──
-let db = window.db || [];
+let db = [];
 let formFront = null, formBack = null;
 let editId = null;
 let pendingBarcode = null;
@@ -453,19 +438,28 @@ let selectedAllergies = [];
 
 async function saveDB(item) {
   try {
+    const col = firestoreDB.collection('ingredients');
     if (item._docId) {
       const docId = item._docId;
       const {_docId, ...data} = item;
-      await window._updateDoc(window._doc(window._firestoreDB, 'ingredients', docId), data);
+      await col.doc(docId).update(data);
     } else {
-      await window._addDoc(window._collection(window._firestoreDB, 'ingredients'), item);
+      await col.add(item);
     }
-  } catch(e) { console.error('Firestore save error:', e); }
+  } catch(e) { console.error('Firestore save error:', e); toast('❌ 저장 실패: ' + e.message); }
 }
 async function deleteFromDB(docId) {
   try {
-    await window._deleteDoc(window._doc(window._firestoreDB, 'ingredients', docId));
+    await firestoreDB.collection('ingredients').doc(docId).delete();
   } catch(e) { console.error('Firestore delete error:', e); }
+}
+function initFirestoreSync() {
+  firestoreDB.collection('ingredients').onSnapshot((snapshot) => {
+    db = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
+    if (typeof firestoreDB !== 'undefined') initFirestoreSync();
+renderItems();
+    document.getElementById('countBadge').textContent = db.length;
+  }, (err) => { console.error('Firestore sync error:', err); });
 }
 
 // ── 알레르기 렌더 ──
