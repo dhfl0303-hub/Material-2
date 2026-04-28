@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<!-- saved from url=(0059)file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_4.html -->
-<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>원료 DB</title>
-<link rel="manifest" href="file:///C:/Users/user/Downloads/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="원료DB">
 <meta name="theme-color" content="#1a1a1a">
-<script src="./원료DB_files/firebase-app-compat.js.다운로드"></script>
-<script src="./원료DB_files/firebase-firestore-compat.js.다운로드"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyA17v9qmiIJVLOsp7iNwMmtw8iQwnaaaJA",
@@ -293,7 +293,7 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
 
 <!-- 스캐너 -->
 <div id="scannerPanel">
-  <video id="video" autoplay="" playsinline="" muted=""></video>
+  <video id="video" autoplay playsinline muted></video>
   <div class="scan-status" id="scanStatus">카메라 시작 중...</div>
   <div class="manual-bc" id="manualBcRow">
     <input type="text" id="manualBcInput" placeholder="바코드 번호 직접 입력" inputmode="numeric">
@@ -358,19 +358,19 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
 
   <!-- 사진 -->
   <div class="photo-row">
-    <div class="photo-box" onclick="document.getElementById(&#39;photoFront&#39;).click()">
+    <div class="photo-box" onclick="document.getElementById('photoFront').click()">
       <span class="photo-icon">📷</span>
       <span class="photo-label">전면</span>
-      <img id="prevFront" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_4.html" style="display:none">
+      <img id="prevFront" src="" style="display:none">
     </div>
-    <div class="photo-box" onclick="document.getElementById(&#39;photoBack&#39;).click()">
+    <div class="photo-box" onclick="document.getElementById('photoBack').click()">
       <span class="photo-icon">📷</span>
       <span class="photo-label">후면</span>
-      <img id="prevBack" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_4.html" style="display:none">
+      <img id="prevBack" src="" style="display:none">
     </div>
   </div>
-  <input type="file" id="photoFront" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(&#39;front&#39;, event)">
-  <input type="file" id="photoBack" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(&#39;back&#39;, event)">
+  <input type="file" id="photoFront" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto('front', event)">
+  <input type="file" id="photoBack" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto('back', event)">
 
   <!-- AI 추출 버튼 -->
   <button class="btn btn-dark" style="width:100%;margin-bottom:12px" onclick="extractWithAI()">🤖 후면 사진으로 원재료 자동 추출</button>
@@ -412,7 +412,7 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
 
 <!-- 목록 -->
 <div class="items-wrap">
-  <div class="empty" id="emptyMsg" style="display: block;">
+  <div class="empty" id="emptyMsg">
     <div class="icon">🗃</div>
     <p>등록된 원료가 없어요<br>바코드를 스캔하거나 추가해주세요</p>
   </div>
@@ -422,7 +422,7 @@ header h1 { color: #f0a500; font-size: 17px; font-weight: 700; }
 <!-- 이미지 모달 -->
 <div id="imgModal" onclick="closeImgModal()">
   <span class="close">×</span>
-  <img id="modalImg" src="file:///C:/Users/user/Downloads/%EC%9B%90%EB%A3%8CDB_4.html">
+  <img id="modalImg" src="">
 </div>
 
 <script>
@@ -800,6 +800,5 @@ function toast(msg) {
 
 renderItems();
 </script>
-
-
-</body></html>
+</body>
+</html>
